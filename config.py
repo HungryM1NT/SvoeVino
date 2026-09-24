@@ -41,11 +41,11 @@ class RabbitMQConfig(BaseModel):
         default="amqp://guest:guest@localhost:5672/"
     )
 
-    consume_queue: str = Field(
+    task_publish_queue: str = Field( # Worker READS this queue to get tasks
         default="wine.recognition.requests"
     )
 
-    publish_queue: str = Field(
+    task_result_queue: str = Field( # Worker WRITES results to this queue
         default="wine.recognition.results"
     )
 

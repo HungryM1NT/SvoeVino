@@ -207,18 +207,18 @@ async def main() -> None:
         )
 
         consume_queue = await channel.declare_queue(
-            settings.rabbitmq.consume_queue,
+            settings.rabbitmq.task_publish_queue,
             durable=True,
         )
 
         await channel.declare_queue(
-            settings.rabbitmq.publish_queue,
+            settings.rabbitmq.task_result_queue,
             durable=True,
         )
 
         logger.info(
             f"Ожидание сообщений в "
-            f"'{settings.rabbitmq.consume_queue}'..."
+            f"'{settings.rabbitmq.task_publish_queue}'..."
         )
 
         async with consume_queue.iterator() as queue_iter:
