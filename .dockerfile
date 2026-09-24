@@ -8,7 +8,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
-    python3-venv \
     libglib2.0-0 \
     libgl1 \
     libsm6 \
@@ -22,9 +21,7 @@ COPY requirements.txt .
 
 RUN python3 -m pip install --break-system-packages -r requirements.txt
 
-COPY config.py .
-COPY main.py .
-COPY recognition_worker.py .
+COPY . .
 
 RUN mkdir -p /app/logs
 
