@@ -10,7 +10,7 @@ import timm
 from tqdm import tqdm
 
 # --- Параметры обучения ---
-DATASET_DIR = "dataset_prepared"
+DATASET_DIR = "DATASTORE/dataset_arc"
 TRAIN_DIR = os.path.join(DATASET_DIR, "train")
 VAL_DIR = os.path.join(DATASET_DIR, "val")
 

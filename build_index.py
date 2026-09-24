@@ -10,7 +10,7 @@ from qdrant_client.models import Distance, VectorParams, PointStruct
 from tqdm import tqdm
 
 # --- Параметры ---
-DATASET_DIR = "dataset_prepared/train"
+DATASET_DIR = "DATASTORE/dataset_arc/train"
 MODEL_WEIGHTS = "best_arcface_model.pth"
 QDRANT_PATH = "qdrant_db"  # Папка, где будет лежать база векторов
 COLLECTION_NAME = "wines"
