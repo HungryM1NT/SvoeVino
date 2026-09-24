@@ -26,7 +26,7 @@ class InferenceNet(nn.Module):
 
 
 class WineRecognizer:
-    def __init__(self, yolo_weights, metric_weights, qdrant_path="qdrant_db", collection_name="wines"):
+    def __init__(self, yolo_weights, metric_weights, qdrant: QdrantClient, collection_name="wines"):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print(f"Инициализация на {self.device}...")
 
@@ -41,7 +41,7 @@ class WineRecognizer:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-        self.qdrant = QdrantClient(path=qdrant_path)
+        self.qdrant = qdrant
         self.collection_name = collection_name
 
     def _apply_clahe(self, img_bgr):
@@ -134,35 +134,35 @@ class WineRecognizer:
         return top_results, expected_score, crop_final
 
 
-if __name__ == "__main__":
-    YOLO_WEIGHTS = "models/YOLO_best_100.pt"
-    METRIC_WEIGHTS = "models/ArcFace_v2.pth"
-    TEST_IMAGE = "96.66_22-08-2026_20-44-40.webp"
+# if __name__ == "__main__":
+#     YOLO_WEIGHTS = "models/YOLO_best_100.pt"
+#     METRIC_WEIGHTS = "models/ArcFace_v2.pth"
+#     TEST_IMAGE = "96.66_22-08-2026_20-44-40.webp"
     
-    CORRECT_SLUG = "perovskih_polusuhoe_krasnoe"
+#     CORRECT_SLUG = "perovskih_polusuhoe_krasnoe"
 
-    recognizer = WineRecognizer(
-        yolo_weights=YOLO_WEIGHTS, 
-        metric_weights=METRIC_WEIGHTS
-    )
+#     recognizer = WineRecognizer(
+#         yolo_weights=YOLO_WEIGHTS, 
+#         metric_weights=METRIC_WEIGHTS
+#     )
     
-    top_results, correct_score, crop = recognizer.recognize(TEST_IMAGE, expected_slug=CORRECT_SLUG)
+#     top_results, correct_score, crop = recognizer.recognize(TEST_IMAGE, expected_slug=CORRECT_SLUG)
     
-    if crop is not None:
-        cv2.imwrite("debug_crop_final.jpg", crop)
+#     if crop is not None:
+#         cv2.imwrite("debug_crop_final.jpg", crop)
         
-    if top_results is None:
-        print("❌ YOLO не смог найти этикетку на фото.")
-    else:
-        print("🏆 ТОП-5 найденных совпадений в базе:")
-        for i, res in enumerate(top_results):
-            print(f"  {i+1}. {res.payload['slug']} (Сходство: {res.score:.3f})")
+#     if top_results is None:
+#         print("❌ YOLO не смог найти этикетку на фото.")
+#     else:
+#         print("🏆 ТОП-5 найденных совпадений в базе:")
+#         for i, res in enumerate(top_results):
+#             print(f"  {i+1}. {res.payload['slug']} (Сходство: {res.score:.3f})")
             
-        print("\n🎯 Поиск правильного вина:")
-        if correct_score is not None:
-            print(f"  Slug: {CORRECT_SLUG}")
-            print(f"  Точность: {correct_score:.3f}")
-        else:
-            print(f"  Слаг '{CORRECT_SLUG}' не найден в базе Qdrant!")
+#         print("\n🎯 Поиск правильного вина:")
+#         if correct_score is not None:
+#             print(f"  Slug: {CORRECT_SLUG}")
+#             print(f"  Точность: {correct_score:.3f}")
+#         else:
+#             print(f"  Слаг '{CORRECT_SLUG}' не найден в базе Qdrant!")
 
-    recognizer.qdrant.close()
+#     recognizer.qdrant.close()
