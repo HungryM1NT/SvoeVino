@@ -1,14 +1,15 @@
 import cv2
+import numpy as np
+import timm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision import transforms
 from PIL import Image
-import numpy as np
-import timm
-from ultralytics import YOLO
 from qdrant_client import QdrantClient
-from qdrant_client.models import Filter, FieldCondition, MatchValue
+from qdrant_client.models import FieldCondition, Filter, MatchValue
+from torchvision import transforms
+from ultralytics import YOLO
+
 
 class InferenceNet(nn.Module):
     def __init__(self, embedding_size=512):
