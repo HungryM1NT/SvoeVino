@@ -76,6 +76,11 @@ def build_index(
     settings: Config,
     dataset_dir: str | None = None,
     batch_size: int = 500,
+    qdrant_use_remote: bool = False,
+    qdrant_host: str | None = None,
+    qdrant_port: int | None = None,
+    qdrant_grpc_port: int | None = None,
+    qdrant_prefer_grpc: bool | None = None
 ) -> None:
     device = torch.device(settings.inference.device if torch.cuda.is_available() else "cpu")
     dataset_path = Path(dataset_dir or settings.inference.dataset_dir)
@@ -86,6 +91,18 @@ def build_index(
     logger.info("Preparing model on {}", device)
     model = _load_model(settings, device)
     transform = _build_transform(settings)
+
+    # Override Qdrant settings if provided
+    if qdrant_use_remote is not None:
+        settings.qdrant.use_local_path = not qdrant_use_remote
+        if qdrant_host is not None:
+            settings.qdrant.host = qdrant_host
+        if qdrant_port is not None:
+            settings.qdrant.port = qdrant_port
+        if qdrant_grpc_port is not None:
+            settings.qdrant.grpc_port = qdrant_grpc_port
+        if qdrant_prefer_grpc is not None:
+            settings.qdrant.prefer_grpc = qdrant_prefer_grpc
 
     client = build_qdrant_client(settings)
 
@@ -140,6 +157,47 @@ def main() -> None:
         default=None,
         help="Override the reference dataset directory (defaults to inference.dataset_dir from config).",
     )
+
+    parser.add_argument(
+        "--qdrant-dir",
+        default=None,
+        help="Override the local Qdrant path (defaults to qdrant.local_path from config).",
+    )
+
+    parser.add_argument(
+        "--qdrant-use-remote",
+        default=True,
+        action="store_true",
+        help="Use the remote Qdrant path instead of the default.",
+    )
+
+    parser.add_argument(
+        "--qdrant-host",
+        default=None,
+        help="Override the Qdrant host (defaults to qdrant.host from config).",
+    )
+
+    parser.add_argument(
+        "--qdrant-port",
+        default=None,
+        type=int,
+        help="Override the Qdrant port (defaults to qdrant.port from config).",
+    )
+
+    parser.add_argument(
+        "--qdrant-grpc-port",
+        default=None,
+        type=int,
+        help="Override the Qdrant gRPC port (defaults to qdrant.grpc_port from config).",
+    )
+
+    parser.add_argument(
+        "--qdrant-prefer-grpc",
+        default=None,
+        action="store_true",
+        help="Override the Qdrant prefer_grpc setting (defaults to qdrant.prefer_grpc from config).",
+    )
+
     parser.add_argument(
         "--batch-size",
         type=int,
