@@ -157,11 +157,10 @@ class WineRecognitionWorker:
         )
 
     @staticmethod
-    def _error_response(request_id: str | None, error: str) -> dict:
+    def _error_response(task_id: str | None, error: str) -> dict:
         return {
-            "request_id": request_id,
-            "results": [],
-            "expected_score": None,
+            "task_id": task_id,
+            "result": [],
             "error": error,
         }
 
