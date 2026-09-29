@@ -20,9 +20,8 @@ from inference import WineRecognizer
 class TaskMessage(BaseModel):
     """Contract for incoming task messages."""
 
-    request_id: str
+    task_id: str
     object_key: str
-    expected_slug: str | None = None
 
 
 def serialize_result(result) -> dict:
@@ -158,11 +157,10 @@ class WineRecognitionWorker:
         )
 
     @staticmethod
-    def _error_response(request_id: str | None, error: str) -> dict:
+    def _error_response(task_id: str | None, error: str) -> dict:
         return {
-            "request_id": request_id,
-            "results": [],
-            "expected_score": None,
+            "task_id": task_id,
+            "result": [],
             "error": error,
         }
 
@@ -176,10 +174,9 @@ class WineRecognitionWorker:
                 return
 
             logger.info(
-                "Received request {}: object_key={} expected_slug={}",
-                task.request_id,
+                "Received request {}: object_key={}",
+                task.task_id,
                 task.object_key,
-                task.expected_slug,
             )
 
             image_path: str | None = None
@@ -197,23 +194,21 @@ class WineRecognitionWorker:
                     image_path,
                 )
 
-                top_results, expected_score, _ = await asyncio.to_thread(
+                top_results, _, _ = await asyncio.to_thread(
                     self.worker.recognize,
                     image_path,
-                    task.expected_slug,
                 )
 
                 response = {
-                    "request_id": task.request_id,
-                    "results": [serialize_result(result) for result in top_results],
-                    "expected_score": expected_score,
+                    "task_id": task.task_id,
+                    "result": [serialize_result(result) for result in top_results],
                 }
 
-                logger.info("Request {} finished successfully", task.request_id)
+                logger.info("Request {} finished successfully", task.task_id)
 
             except Exception:
-                logger.exception("Recognition failed for request {}", task.request_id)
-                response = self._error_response(task.request_id, "recognition_failed")
+                logger.exception("Recognition failed for request {}", task.task_id)
+                response = self._error_response(task.task_id, "recognition_failed")
 
             finally:
                 if image_path is not None:
@@ -222,7 +217,7 @@ class WineRecognitionWorker:
             await self.publish_result(response)
             logger.info(
                 "Result for request {} published to '{}'",
-                task.request_id,
+                task.task_id,
                 self.settings.rabbitmq.consume_queue,
             )
 
